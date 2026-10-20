@@ -5,15 +5,28 @@
 <style>body{font:16px system-ui,sans-serif;margin:40px 16px;color:#222}</style>
 <p>Opening Phone Link… <a id="go" href="#">Click here</a> if nothing happens.</p>
 <script>
-  // Link format: sms.html#<number>  or  sms.html#<number>?body=<url-encoded message>
+  // Link format: sms.html#<number>  or  sms.html#<number>?body=<message>
   // Everything after the # stays in your browser (never sent to the host).
-  var h = location.hash.slice(1);
-  var i = h.indexOf('?');
-  var n = decodeURIComponent(i < 0 ? h : h.slice(0, i)).replace(/[^\d+]/g, '');
-  var extra = i < 0 ? '' : h.slice(i); // e.g. ?body=Hello%2C%20there
+
+  // Undo encoding, even if Sheets/the browser encoded the link more than once.
+  function fullDecode(s) {
+    for (var k = 0; k < 3; k++) {
+      var d;
+      try { d = decodeURIComponent(s); } catch (e) { break; }
+      if (d === s) break;
+      s = d;
+    }
+    return s;
+  }
+
+  var h = fullDecode(location.hash.slice(1));
+  var i = h.indexOf('?body=');
+  var n = (i < 0 ? h : h.slice(0, i)).replace(/[^\d+]/g, '');
+  var body = i < 0 ? '' : h.slice(i + 6);
+
   if (n) {
     if (n.charAt(0) !== '+') n = '+' + (n.length === 10 ? '1' + n : n); // 10 digits = US number
-    var link = 'sms:' + n + extra;
+    var link = 'sms:' + n + (body ? '?body=' + encodeURIComponent(body) : '');
     document.getElementById('go').href = link;
     location.href = link;
   } else {
