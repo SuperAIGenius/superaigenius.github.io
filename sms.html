@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open in Phone Link</title>
+<style>body{font:16px system-ui,sans-serif;margin:40px 16px;color:#222}</style>
+<p>Opening Phone Link… <a id="go" href="#">Click here</a> if nothing happens.</p>
+<script>
+  // Number comes after the # so it never leaves your browser (not sent to the host).
+  var n = decodeURIComponent(location.hash.slice(1)).replace(/[^\d+]/g, '');
+  if (n) {
+    if (n.charAt(0) !== '+') n = '+' + (n.length === 10 ? '1' + n : n); // 10 digits = US number
+    var link = 'sms:' + n;
+    document.getElementById('go').href = link;
+    location.href = link;
+  } else {
+    document.body.textContent = 'No phone number in the link.';
+  }
+</script>
